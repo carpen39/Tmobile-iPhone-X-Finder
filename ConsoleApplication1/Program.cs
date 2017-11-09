@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace ConsoleApplication1
@@ -23,6 +24,7 @@ namespace ConsoleApplication1
                 CheckForIPhoneX(zipCode, "TMOBILE/US");
                 //CheckForIPhoneX(zipCode, "VERIZON/US");
                 //CheckForIPhoneX(zipCode, "SPRINT/US");
+                Thread.Sleep(5000);
             }
         }
 
@@ -39,17 +41,23 @@ namespace ConsoleApplication1
 
                 if (response.body.stores.Any(x => x.partsAvailability != null && x.partsAvailability.Count > 0))
                 {
-
+                    bool found = false;
                     foreach (var store in response.body.stores.Where(x => x.partsAvailability != null && x.partsAvailability.Count > 0))
                     {
-                        foreach (var part in store.partsAvailability.Where(x => x.Value.pickupDisplay != "unavailable"))
+                        foreach (var part in store.partsAvailability.Where(x => x.Value.pickupDisplay != "unavailable" && x.Value.pickupDisplay != "ineligible"))
                         {
+                            found = true;
                             Console.WriteLine($"{carrier}: Phone {part.Value.storePickupProductTitle} found at {store.storeName}");
                         }
 
                     }
 
-                }
+                    if (!found)
+                    {
+                        Console.WriteLine($"{carrier}: No models found in stock at the 12 closest stores.");
+                    }
+
+                } 
             }
             catch (Exception ex)
             {
